@@ -9,7 +9,9 @@
 # Right click to cancel download of video from your clipboard.
 # If already running, left clicking will gracefully restart youtube-dl
 # and resume the download.
-# Handles multiple downloads simultaneously, just copy URL, click, copy URL, click.
+# Handles multiple downloads simultaneously, just copy URL, click, copy URL,
+# click.
+#
 # Your ~/.config/i3blocks/config:
 #
 # [youtubed_controller]

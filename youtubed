@@ -5,15 +5,10 @@
 # Daemon for downloading and playing the youtube URL
 # in your clipboard. (Should work with any youtube-dl compatible URL.)
 #
-# Left click to trigger download of video from your clipboard.
-# Right click to cancel download of video from your clipboard.
-# If already running, left clicking will gracefully restart youtube-dl
-# and resume the download.
-# Handles multiple downloads simultaneously, just copy URL, click, copy URL, click.
-# 
 # Depends: youtube-dl, inotify-tools, mpv, i3{,bar,blocks}, xclip
 # The dependency on inotify-tools can be removed easily by
-# using sleep instead, and mpv can be subsituted with any media player (or none).
+# using sleep instead, and mpv can be subsituted with any media player 
+# (or none).
 #
 # ./youtubed --download-dir=/data/videos/youtube
 #
@@ -64,14 +59,23 @@ function setup_options {
     }
 
     append_option h help "Print this help message."
-    append_option "" "download-signal:" "The signal that will trigger a download. Default: $DOWNLOAD_SIGNAL"
-    append_option "" "cancel-signal:" "The signal that will cancel a download. Default: $CANCEL_SIGNAL"
-    append_option "" "download-dir:" "The directory to save downloads in. Default: \$XDG_DATA_DIR" 
-    append_option "" "exec-after-write:" "A command to execute after youtube-dl writes a status line. Default: $EXEC_AFTER_WRITE"
-    append_option "" "daemon-dir:" "The directory that youtubed keeps its state files (.pid files, progress files, youtubed-fifo, status text files). Default: \$XDG_RUNTIME_DIR/youtubed"
-    append_option "" "format-str:" "The format string to supply to youtube-dl. Default: $FORMAT_STR"
-    append_option "" "media-cmd:" "Use \"media-cmd file\" to open a file after download. Default: $MEDIA_CMD"
-    append_option "" "run-in-foreground" "Tells youtubed to stay in the foreground."
+    append_option "" "download-signal:" "The signal that will trigger a " \
+        "download. Default: $DOWNLOAD_SIGNAL"
+    append_option "" "cancel-signal:" "The signal that will cancel a " \
+        "download. Default: $CANCEL_SIGNAL"
+    append_option "" "download-dir:" "The directory to save downloads in. " \
+        "Default: \$XDG_DATA_DIR" 
+    append_option "" "exec-after-write:" "A command to execute after " \
+        "youtube-dl writes a status line. Default: $EXEC_AFTER_WRITE"
+    append_option "" "daemon-dir:" "The directory that youtubed keeps its " \
+        "state files (.pid files, progress files, youtubed-fifo, status text " \
+        "files). Default: \$XDG_RUNTIME_DIR/youtubed"
+    append_option "" "format-str:" "The format string to supply to " \
+        "youtube-dl. Default: $FORMAT_STR"
+    append_option "" "media-cmd:" "Use \"media-cmd file\" to open a file " \
+        "after download. Default: $MEDIA_CMD"
+    append_option "" "run-in-foreground" "Tells youtubed to stay in the " \
+        "foreground."
 }
 setup_options
 
@@ -138,7 +142,8 @@ function setup_sane_running_conditions {
         "--daemon-dir (and --download-dir, unless you are sure you won't be " \
         "attempting to download the same video in more than one daemon."
 
-    mkfifo -m=600 "$DAEMON_DIR"/"$FIFO" || error_and_exit "Failed to make fifo: ""$DAEMON_DIR"/"$FIFO."
+    mkfifo -m=600 "$DAEMON_DIR"/"$FIFO" || error_and_exit \
+        "Failed to make fifo: ""$DAEMON_DIR"/"$FIFO."
 }
 setup_sane_running_conditions
 
@@ -160,7 +165,8 @@ function download {
     fi
 
     if [ -f "$DAEMON_DIR"/"$FILENAME".pid ]; then
-        info "Found ""$DAEMON_DIR"/"$FILENAME"".pid, attempting to cancel it first."
+        info "Found ""$DAEMON_DIR"/"$FILENAME"".pid, "\
+            "attempting to cancel it first."
         cancel "$URL" "$FILENAME"
     fi
 
@@ -198,10 +204,12 @@ function download {
             # filename is too long, hence the need for FULL_FILENAME
             FULL_FILENAME=$(youtube-dl --get-filename --restrict-filenames \
                 -f bestvideo+bestaudio -o "$FORMAT_STR" "$URL")
-            info "Notifier for FILENAME=$FILENAME, PID=$PID: FULL_FILENAME=$FULL_FILENAME"
+            info "Notifier for FILENAME=$FILENAME, PID=$PID: " \
+                "FULL_FILENAME=$FULL_FILENAME"
             mv "$DOWNLOAD_DIR"/{"$FILENAME","$FULL_FILENAME"}
             if [ -n "$MEDIA_CMD" ]; then
-                info "Notifier for FILENAME=$FILENAME, PID=$PID: Found media command, executing"
+                info "Notifier for FILENAME=$FILENAME, PID=$PID: " \
+                    "Found media command, executing"
                 bash -c "$MEDIA_CMD ""$DOWNLOAD_DIR"/"$FULL_FILENAME"
             fi
         fi
