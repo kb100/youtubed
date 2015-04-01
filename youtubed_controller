@@ -1,0 +1,84 @@
+#!/bin/bash
+# Copyright (C) 2015 James Murphy
+# Licensed under the terms of the GNU GPL v2 only.
+#
+# Display script to read .i3text files in a directory.
+# Intended to be signal triggered by the youtubed script.
+#
+# Left click to trigger download of video from your clipboard.
+# Right click to cancel download of video from your clipboard.
+# If already running, left clicking will gracefully restart youtube-dl
+# and resume the download.
+# Handles multiple downloads simultaneously, just copy URL, click, copy URL, click.
+# Your ~/.config/i3blocks/config:
+#
+# [youtubed_controller]
+# command=$SCRIPT_DIR/youtubed_controller DAEMON_DIR
+# interval=once
+# signal=1
+
+
+# 
+#DAEMON_DIR=${1:-"$XDG_RUNTIME_DIR/youtubed"}
+#FIFO="$DAEMON_DIR"/"youtubed.fifo"
+#
+DAEMON_DIR="$HOME/scripts/test"
+FIFO="$DAEMON_DIR"/"youtubed.fifo"
+
+FULL_TEXT=""
+SHORT_TEXT=""
+SEPARATOR="|"
+STATUS_STR="[DL]"
+COLOR="#FFFFFF"
+
+function send_command {
+    if [ ! -p "$FIFO" ]; then
+        echo "fifo not found: $FIFO"
+        echo "fifo not found: $FIFO"
+        echo "FF0000"
+        exit 0
+    fi
+
+    echo "$1" > $FIFO
+}
+
+case "$BLOCK_BUTTON" in
+    1) send_command download ;;
+    3) send_command cancel ;;
+esac
+
+shopt -s nullglob
+
+for f in "$DAEMON_DIR"/*.i3text; do
+    TEXT=$(head -n 1 $f)
+    if [ -n "$FULL_TEXT" ]; then
+        FULL_TEXT="$FULL_TEXT $SEPARATOR $TEXT"
+    else
+        COLOR="#FFFF00"
+        FULL_TEXT="$TEXT"
+    fi
+done
+if [ -n "$FULL_TEXT" ]; then
+    FULL_TEXT="$FULL_TEXT $SEPARATOR $STATUS_STR"
+else
+    FULL_TEXT="$STATUS_STR"
+fi
+
+for f in "$DAEMON_DIR"/*.i3text; do
+    TEXT=$(tail -n 1 $f)
+    if [ -n "$SHORT_TEXT" ]; then
+        SHORT_TEXT="$SHORT_TEXT $SEPARATOR $TEXT"
+    else
+        SHORT_TEXT="$TEXT"
+    fi
+done
+if [ -n "$SHORT_TEXT" ]; then
+    SHORT_TEXT="$SHORT_TEXT $SEPARATOR $STATUS_STR"
+else
+    SHORT_TEXT="$STATUS_STR"
+fi
+
+echo "$FULL_TEXT"
+echo "$SHORT_TEXT"
+echo "$COLOR"
+exit 0
