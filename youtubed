@@ -260,8 +260,8 @@ function die {
 }
 
 function command_loop {   
-    trap download SIGUSR1
-    trap cancel SIGUSR2
+    trap download "$DOWNLOAD_SIGNAL"
+    trap cancel "$CANCEL_SIGNAL"
 
     function dispatch_command {
         info "Received command: $1"
