@@ -19,7 +19,7 @@
 # signal=1
 
 # User configurables
-DOWNLOAD_DIR="$XDG_DATA_DIR"
+DOWNLOAD_DIR="$XDG_DATA_DIR/youtubed"
 DAEMON_DIR="$XDG_RUNTIME_DIR/youtubed"
 DOWNLOAD_SIGNAL="SIGUSR1"
 CANCEL_SIGNAL="SIGUSR2"
@@ -136,8 +136,8 @@ function setup_sane_running_conditions {
         "Failed to create daemon-dir: $DAEMON_DIR. "\
         "Try a different one with the --daemon-dir option."
 
-    test -f "$DAEMON_DIR/.youtubed.dpid" && error_and_exit \
-        "Found .youtubed.dpid. Is youtubed already running? " \
+    test -f "$DAEMON_DIR"/"youtubed.dpid" && error_and_exit \
+        "Found youtubed.dpid. Is youtubed already running? " \
         "Expert users may run multiple youtubed by specifying a unique " \
         "--daemon-dir (and --download-dir, unless you are sure you won't be " \
         "attempting to download the same video in more than one daemon."
@@ -281,6 +281,7 @@ function command_loop {
 }
 
 echo "$$" > "$DAEMON_DIR"/youtubed.dpid
+$EXEC_AFTER_WRITE
 if [ "$RUN_IN_FOREGROUND" == "1" ]; then
     command_loop
 else

@@ -19,13 +19,26 @@
 # interval=once
 # signal=1
 
-
-# 
-#DAEMON_DIR=${1:-"$XDG_RUNTIME_DIR/youtubed"}
-#FIFO="$DAEMON_DIR"/"youtubed.fifo"
-#
-DAEMON_DIR="$HOME/scripts/test"
+DAEMON_DIR=${1:-"$XDG_RUNTIME_DIR"/"youtubed"}
 FIFO="$DAEMON_DIR"/"youtubed.fifo"
+
+shopt -s nullglob
+
+BAD_SETUP=1
+if [ -d "$DAEMON_DIR" ]; then
+    PIDS=$(pgrep youtubed)
+    dpid=$(cat "$DAEMON_DIR"/"youtubed.dpid" 2>/dev/null)
+    for pid in $PIDS; do
+        [ "$pid" == "$dpid" ] && BAD_SETUP=0
+    done
+fi
+
+if [ "$BAD_SETUP" == "1" ]; then
+    echo "No youtubed running in ""$DAEMON_DIR"
+    echo "No youtubed running in ""$DAEMON_DIR"
+    echo "#FF0000"
+    exit 0
+fi
 
 FULL_TEXT=""
 SHORT_TEXT=""
@@ -49,7 +62,6 @@ case "$BLOCK_BUTTON" in
     3) send_command cancel ;;
 esac
 
-shopt -s nullglob
 
 for f in "$DAEMON_DIR"/*.i3text; do
     TEXT=$(head -n 1 $f)
