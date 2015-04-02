@@ -7,6 +7,7 @@ Development copy, expect bugs.
 - [INSTALLATION] (#installation)
 - [OPTIONS] (#options)
 - [BUGS] (#bugs)
+- [USE] (#use)
 
 # INSTALLATION
 
@@ -45,6 +46,25 @@ Restart `i3`:
     i3-msg restart
 
 Your `youtubed` is now running!
+
+# USE
+
+Left click to trigger download of video from your clipboard.
+Right click to cancel download of video from your clipboard.
+These can also be done by sending `SIGUSR1` and `SIGUSR2` respectively, e.g.:
+
+    pkill -SIGUSR1 youtubed
+
+or by sending commands directly to `youtubed`'s command fifo:
+
+    echo "download $URL" > $DAEMON_DIR/youtubed.fifo
+
+A simple "download" or "cancel" assumes the clipboard should be used.
+Alternatively you can specify  other signals with `--download-signal` and `--cancel-signal`.
+If already running, left clicking will gracefully restart youtube-dl
+and resume the download.
+Multiple simultaneous downloads are supported, just copy URL, click, copy URL, click.
+Terminating `youtubed` can be done with a `SIGTERM` or by sending the message "die" to the fifo.
 
 # OPTIONS
 
