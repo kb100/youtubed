@@ -6,8 +6,8 @@ Development copy, expect bugs.
 
 - [INSTALLATION] (#installation)
 - [OPTIONS] (#options)
-- [BUGS] (#bugs)
 - [USE] (#use)
+- [BUGS] (#bugs)
 
 # INSTALLATION
 
@@ -49,8 +49,8 @@ Your `youtubed` is now running!
 
 # USE
 
-Left click to trigger download of video from your clipboard.
-Right click to cancel download of video from your clipboard.
+Left click to trigger download of the video from your clipboard.
+Right click to cancel download of the video from your clipboard.
 These can also be done by sending `SIGUSR1` and `SIGUSR2` respectively, e.g.:
 
     pkill -SIGUSR1 youtubed
