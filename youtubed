@@ -201,9 +201,9 @@ function download {
             PROGRESS=$(tail -n1 "$DAEMON_DIR"/"$FILENAME".progress 2> /dev/null)
             #TODO make prettier progress
             if [ -n "$PROGRESS" ]; then
-                echo "$FILENAME: $PROGRESS" >"$DAEMON_DIR"/"$FILENAME".i3text
-                echo "$PROGRESS" >>"$DAEMON_DIR"/"$FILENAME".i3text
-                $EXEC_AFTER_WRITE
+                write_immediate "$DAEMON_DIR"/"$FILENAME".i3text \
+                    "$FILENAME: $PROGRESS" \
+                    "$PROGRESS"
             fi
         done
         
@@ -259,11 +259,11 @@ function cancel {
     fi
     
     # trigger inotifywait of other thread so it will kill itself
-    echo "" > "$DAEMON_DIR"/"$FILENAME".progress
+    echo " " > "$DAEMON_DIR"/"$FILENAME".progress
     
     # wait for other thread to kill itself
     if [ -f "$DAEMON_DIR"/"$FILENAME".pid ]; then
-        inotifywait -q -q -t 5 -e delete_self "$FILENAME".pid
+        inotifywait -q -q -t 5 -e delete_self "$DAEMON_DIR"/"$FILENAME".pid
     fi
 
     rm "$DAEMON_DIR"/"$FILENAME".{pid,progress,i3text} 2> /dev/null
