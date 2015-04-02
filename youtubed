@@ -147,9 +147,22 @@ function setup_sane_running_conditions {
 }
 setup_sane_running_conditions
 
+function write_immediate {
+    OUT="$1"
+    FULL_TEXT="$2"
+    SHORT_TEXT=${3:-$2}
+    echo "$FULL_TEXT" >"$OUT"
+    echo "$SHORT_TEXT" >>"$OUT"
+    $EXEC_AFTER_WRITE
+}
+
 function download {
     local URL=${1:-$(xclip -out)}
     info "Set URL: $URL"
+    local SANITIZED_URL=$(sed 's/\///g' <<< "$URL")
+    write_immediate "$DAEMON_DIR"/"$SANITIZED_URL".i3text \
+        "$URL: getting filename"
+
     local FILENAME=${2:-$(youtube-dl --get-filename --restrict-filenames \
         -f bestvideo+bestaudio -o "%(id)s.%(ext)s" "$URL")}
     local YT_EXIT=$?
@@ -158,11 +171,13 @@ function download {
     # Don't do anything if the name lookup failed
     if [ "$YT_EXIT" -ne 0 ] || [ -z "$FILENAME" ]; then
         error "Couldn't download: $URL"
-        echo "Couldn't download: $URL">"$DAEMON_DIR"/"$URL".i3text 
-        echo "Couldn't download: $URL">>"$DAEMON_DIR"/"$URL".i3text
-        $EXEC_AFTER_WRITE
+        write_immediate "$DAEMON_DIR"/"$SANITIZED_URL".i3text \
+            "Couldn't download: $URL"
         return
     fi
+
+    rm "$DAEMON_DIR"/"$SANITIZED_URL".i3text 2>/dev/null
+    $EXEC_AFTER_WRITE
 
     if [ -f "$DAEMON_DIR"/"$FILENAME".pid ]; then
         info "Found ""$DAEMON_DIR"/"$FILENAME"".pid, "\
@@ -221,6 +236,8 @@ function download {
 function cancel {
     local URL=${1:-$(xclip -out)}
     info "Set URL: $URL"
+    local SANITIZED_URL=$(sed 's/\///g' <<< "$URL")
+    write_immediate "$DAEMON_DIR"/"$SANITIZED_URL".i3text "$URL: Canceling"
     local FILENAME=${2:-$(youtube-dl --get-filename --restrict-filenames \
         -f bestvideo+bestaudio -o "%(id)s.%(ext)s" "$URL")}
     local YT_EXIT=$?
@@ -229,11 +246,13 @@ function cancel {
     # Don't do anything if the name lookup failed
     if [ "$YT_EXIT" -ne 0 ] || [ -z "$FILENAME" ]; then
         error "Couldn't cancel: $URL"
-        echo "Couldn't cancel: $URL" >"$DAEMON_DIR"/"$URL".i3text 
-        echo "Couldn't cancel: $URL" >>"$DAEMON_DIR"/"$URL".i3text 
-        $EXEC_AFTER_WRITE
+        write_immediate "$DAEMON_DIR"/"$SANITIZED_URL".i3text \
+            "Couldn't cancel: $URL" 
         return
     fi
+
+    rm "$DAEMON_DIR"/"$SANITIZED_URL".i3text 2>/dev/null
+    $EXEC_AFTER_WRITE
 
     if [ -f "$DAEMON_DIR"/"$FILENAME".pid ]; then
         kill $(cat "$DAEMON_DIR"/"$FILENAME".pid)
@@ -250,12 +269,13 @@ function cancel {
     rm "$DAEMON_DIR"/"$FILENAME".{pid,progress,i3text} 2> /dev/null
 }
 
-function die {    
+function die {
     shopt -s nullglob
     for pidfile in "$DAEMON_DIR"/*.pid; do
         kill $(cat $pidfile)
     done
     rm "$DAEMON_DIR"/youtubed.dpid
+    $EXEC_AFTER_WRITE
     exit 0
 }
 
@@ -265,8 +285,8 @@ function command_loop {
 
     function dispatch_command {
         info "Received command: $1"
-        local CMD=`cut -d ' ' -f 1 <<< "$1"`
-        local ARGS=`cut -d ' ' -sf 2- <<< "$1"`
+        local CMD=$(cut -d ' ' -f 1 <<< "$1")
+        local ARGS=$(cut -d ' ' -sf 2- <<< "$1")
         case "$CMD" in
             download) download "$ARGS";;
             cancel) cancel "$ARGS";;
@@ -288,3 +308,4 @@ else
     command_loop &
     disown
 fi
+
