@@ -27,7 +27,7 @@ They are bash scripts, so there is no need to compile, just put them somewhere i
 Edit your `i3blocks` config (e.g. `$HOME/.config/i3blocks/config`):
 
     [youtube_controller]
-    command=$SCRIPT_DIR/youtube_progress
+    command=$SCRIPT_DIR/youtubed_controller
     interval=once
     signal=1
 
