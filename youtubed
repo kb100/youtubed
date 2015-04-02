@@ -62,7 +62,7 @@ function setup_options {
     append_option "" "cancel-signal:" "The signal that will cancel a "\
 "download. Default: $CANCEL_SIGNAL"
     append_option "" "download-dir:" "The directory to save downloads in. "\
-"Default: \$XDG_DATA_DIR" 
+"Default: \$XDG_DATA_DIR/youtubed" 
     append_option "" "exec-after-write:" "A command to execute after "\
 "youtube-dl writes a status line. Default: $EXEC_AFTER_WRITE"
     append_option "" "daemon-dir:" "The directory that youtubed keeps its "\

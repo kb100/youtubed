@@ -74,7 +74,7 @@ Terminating `youtubed` can be done with a `SIGTERM` or by sending the message "d
     --cancel-signal     The signal that will cancel a download.
                         Default: SIGUSR2
     --download-dir      The directory to save downloads in.
-                        Default: $XDG_DATA_DIR
+                        Default: $XDG_DATA_DIR/youtubed
     --exec-after-write  A command to execute after youtube-dl writes a status
                         line. 
                         Default: pkill -RTMIN+1 i3blocks
