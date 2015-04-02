@@ -5,10 +5,8 @@
 # Daemon for downloading and playing the youtube URL
 # in your clipboard. (Should work with any youtube-dl compatible URL.)
 #
-# Depends: youtube-dl, inotify-tools, mpv, i3{,bar,blocks}, xclip
-# The dependency on inotify-tools can be removed easily by
-# using sleep instead, and mpv can be subsituted with any media player 
-# (or none).
+# Depends: youtube-dl, inotify-tools, mpv, i3{,blocks}, xclip
+# Note that mpv can be subsituted with any media player (or none).
 #
 # ./youtubed --download-dir=/data/videos/youtube
 #
