@@ -2,7 +2,7 @@ youtubed - A bash daemon for controlling youtube-dl
 
 
 
-Development copy. MINIMALLY TESTED, UNFINISHED, EXPECT SYSTEM CRASHING BUGS.
+Development copy, expect bugs.
 
 - [INSTALLATION] (#installation)
 - [OPTIONS] (#options)
@@ -36,6 +36,9 @@ Run the `youtubed` script:
     youtubed --download-dir=$HOME/.youtubed --media-cmd="i3-msg exec mpv"
 
 where you can replace `mpv` with your favorite media player, or with `""` to disable automatic opening of files after download completes. 
+If you specify `--daemon-dir` you must also specify the same directory in the i3blocks blocklet command:
+
+    command=$SCRIPT_DIR/youtubed_controller $DAEMON_DIR
 
 Restart `i3`:
 
@@ -68,4 +71,5 @@ Your `youtubed` is now running!
 # BUGS
 
 Report bugs and suggests at the [issues](https://github.com/kb100/youtubed/issues) page.
+Try running `youtubed` with the `--run-in-foreground` flag for some helpful output.
 Fixes and other contributions are welcome.
