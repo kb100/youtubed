@@ -146,9 +146,9 @@ function setup_sane_running_conditions {
 setup_sane_running_conditions
 
 function write_immediate {
-    OUT="$1"
-    FULL_TEXT="$2"
-    SHORT_TEXT=${3:-$2}
+    local OUT="$1"
+    local FULL_TEXT="$2"
+    local SHORT_TEXT=${3:-$2}
     echo "$FULL_TEXT" >"$OUT"
     echo "$SHORT_TEXT" >>"$OUT"
     $EXEC_AFTER_WRITE
