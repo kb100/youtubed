@@ -157,8 +157,8 @@ function write_immediate {
 function download {
     local URL=${1:-$(xclip -out)}
     info "Set URL: $URL"
-    local SANITIZED_URL=$(sed 's/\///g' <<< "$URL")
-    write_immediate "$DAEMON_DIR"/"$SANITIZED_URL".i3text \
+    local TMP_INFO=$(mktemp -p "$DAEMON_DIR")
+    write_immediate "$TMP_INFO".i3text \
         "$URL: getting filename"
 
     local FILENAME=${2:-$(youtube-dl --get-filename --restrict-filenames \
@@ -169,12 +169,13 @@ function download {
     # Don't do anything if the name lookup failed
     if [ "$YT_EXIT" -ne 0 ] || [ -z "$FILENAME" ]; then
         error "Couldn't download: $URL"
-        write_immediate "$DAEMON_DIR"/"$SANITIZED_URL".i3text \
+        write_immediate "$TMP_INFO".i3text \
             "Couldn't download: $URL"
+        sleep 2 && rm "$TMP_INFO".i3text && $EXEC_AFTER_WRITE &
         return
     fi
 
-    rm "$DAEMON_DIR"/"$SANITIZED_URL".i3text 2>/dev/null
+    rm "$TMP_INFO".i3text 2> /dev/null
     $EXEC_AFTER_WRITE
 
     if [ -f "$DAEMON_DIR"/"$FILENAME".pid ]; then
@@ -233,8 +234,8 @@ function download {
 function cancel {
     local URL=${1:-$(xclip -out)}
     info "Set URL: $URL"
-    local SANITIZED_URL=$(sed 's/\///g' <<< "$URL")
-    write_immediate "$DAEMON_DIR"/"$SANITIZED_URL".i3text "$URL: Canceling"
+    local TMP_INFO=$(mktemp -p "$DAEMON_DIR")
+    write_immediate "$TMP_INFO".i3text "$URL: Canceling"
     local FILENAME=${2:-$(youtube-dl --get-filename --restrict-filenames \
         -f bestvideo+bestaudio -o "%(id)s.%(ext)s" "$URL")}
     local YT_EXIT=$?
@@ -243,12 +244,13 @@ function cancel {
     # Don't do anything if the name lookup failed
     if [ "$YT_EXIT" -ne 0 ] || [ -z "$FILENAME" ]; then
         error "Couldn't cancel: $URL"
-        write_immediate "$DAEMON_DIR"/"$SANITIZED_URL".i3text \
-            "Couldn't cancel: $URL" 
+        write_immediate "$TMP_INFO".i3text \
+            "Couldn't cancel: $URL"
+        sleep 2 && rm "$TMP_INFO".i3text && $EXEC_AFTER_WRITE &
         return
     fi
 
-    rm "$DAEMON_DIR"/"$SANITIZED_URL".i3text 2>/dev/null
+    rm "$TMP_INFO".i3text 2> /dev/null
     $EXEC_AFTER_WRITE
 
     if [ -f "$DAEMON_DIR"/"$FILENAME".pid ]; then
@@ -271,6 +273,7 @@ function die {
     for pidfile in "$DAEMON_DIR"/*.pid; do
         kill $(cat $pidfile)
     done
+    pkill -SIGTERM -P $BASHPID
     rm "$DAEMON_DIR"/youtubed.dpid
     rm "$DAEMON_DIR"/"$FIFO"
     $EXEC_AFTER_WRITE
