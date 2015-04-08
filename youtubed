@@ -205,14 +205,14 @@ function download {
             fi
         done
         
-        rm "$DAEMON_DIR"/"$FILENAME".{pid,progress,i3text} 2> /dev/null
-        $EXEC_AFTER_WRITE
-
         info "Notifier for FILENAME=$FILENAME, PID=$PID: done notifying"
 
         # If download was successful, rename and watch your video
         if [ -f "$DOWNLOAD_DIR"/"$FILENAME" ]; then
             info "Download appears to be successful, getting FULL_FILENAME"
+            write_immediate "$DAEMON_DIR"/"$FILENAME".i3text \
+                "$FILENAME: Getting full filename" \
+                "$FILENAME: Getting full filename"
             # youtube-dl (or rather ffmpeg) will fail at the merge step if 
             # filename is too long, hence the need for FULL_FILENAME
             FULL_FILENAME=$(youtube-dl --get-filename --restrict-filenames \
@@ -226,6 +226,9 @@ function download {
                 bash -c "$MEDIA_CMD ""$DOWNLOAD_DIR"/"$FULL_FILENAME"
             fi
         fi
+        
+        rm "$DAEMON_DIR"/"$FILENAME".{pid,progress,i3text} 2> /dev/null
+        $EXEC_AFTER_WRITE
     }   
     spawn_notifier "$FILENAME" "$PID" &
     info "Spawned notifier for FILENAME=$FILENAME, PID=$PID, notifier PID=$!"
