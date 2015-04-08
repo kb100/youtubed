@@ -31,11 +31,11 @@ function setup_options {
     HELP_TEXT="Usage: youtubed options\n"
 
     function append_option {
-        SHORT=$1
-        LONG=$2
-        HELP=$3
+        local SHORT=$1
+        local LONG=$2
+        local HELP=$3
         HELP=$(sed "s/%/%%/g" <<<$HELP)
-        HELP_LINE=""
+        local HELP_LINE=""
         SHORTOPTS="$SHORTOPTS$SHORT"
         if [ -n "$LONGOPTS" ]; then
             LONGOPTS="$LONGOPTS,"
