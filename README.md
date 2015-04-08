@@ -64,6 +64,8 @@ i3-msg restart
 Your youtubed setup is now running!
 You should now see `[DL]` in your status line.
 
+![youtubed](https://cloud.githubusercontent.com/assets/1966710/7039499/741102cc-dd88-11e4-8a8e-999efb8ebb32.gif)
+
 # USE
 
 Left click the blocklet to trigger a download of the video from your clipboard.
