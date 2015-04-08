@@ -16,36 +16,50 @@ It is possible to use youtubed
 
 Install the dependencies:
 
-    sudo aptitude install youtube-dl inotify-tools xclip
+```ShellSession
+sudo aptitude install youtube-dl inotify-tools xclip
+```
 
 Clone the repo:
 
-    git clone https://github.com/kb100/youtubed.git
+```ShellSession
+git clone https://github.com/kb100/youtubed.git
+```
 
 Since the executables are bash scripts, there is no need to compile them.
 Just put them somewhere in your path:
 
-    sudo cp youtubed/{youtubed,youtubed_controller} /usr/local/bin
+```ShellSession
+sudo cp youtubed/{youtubed,youtubed_controller} /usr/local/bin
+```
 
 Edit your i3blocks config (e.g. `$HOME/.config/i3blocks/config`):
 
-    [youtube_controller]
-    command=$SCRIPT_DIR/youtubed_controller
-    interval=once
-    signal=1
+```INI
+[youtube_controller]
+command=$SCRIPT_DIR/youtubed_controller
+interval=once
+signal=1
+```
 
 Run the youtubed script:
 
-    youtubed --download-dir=$HOME/.youtubed --media-cmd="i3-msg exec mpv"
+```ShellSession
+youtubed --download-dir=$HOME/.youtubed --media-cmd="i3-msg exec mpv"
+```
 
 where you can replace mpv with your favorite media player, or use `--media-cmd=""` to disable automatic opening of files after download completes. 
 If you specify `--daemon-dir`, you must also specify the same directory in the i3blocks blocklet command:
 
-    command=$SCRIPT_DIR/youtubed_controller $DAEMON_DIR
+```INI
+command=$SCRIPT_DIR/youtubed_controller $DAEMON_DIR
+```
 
 After you have setup your i3blocks configuration, restart i3 inplace:
 
-    i3-msg restart
+```ShellSession
+i3-msg restart
+```
 
 Your youtubed setup is now running!
 You should now see `[DL]` in your status line.
@@ -56,11 +70,15 @@ Left click the blocklet to trigger a download of the video from your clipboard.
 Right click the blocklet to cancel a download of the video from your clipboard.
 These can also be done by sending SIGUSR1 and SIGUSR2 respectively, e.g.:
 
-    pkill -SIGUSR1 youtubed
+```ShellSession
+pkill -SIGUSR1 youtubed
+```
 
 or by sending commands directly to youtubed's command fifo:
 
-    echo "download $URL" > $DAEMON_DIR/youtubed.fifo
+```ShellSession
+echo "download $URL" > $DAEMON_DIR/youtubed.fifo
+```
 
 A simple "download" or "cancel" command with no other arguments will use the clipboard's content's
 as the URL to download or cancel.
