@@ -5,13 +5,14 @@ youtubed - A bash daemon for controlling youtube-dl
 Development copy, expect bugs.
 
 - [INSTALLATION] (#installation)
-- [OPTIONS] (#options)
 - [USE] (#use)
+- [OPTIONS] (#options)
 - [BUGS] (#bugs)
 
 # INSTALLATION
 
-This script was written to be used with [i3](http://www.i3wm.org) and [i3blocks](https://github.com/vivien/i3blocks), so we assume you have a working desktop installation of each.
+These scripts were written to be used with [i3](http://www.i3wm.org) and [i3blocks](https://github.com/vivien/i3blocks), so we assume you have a working installation of each.
+It is possible to use youtubed
 
 Install the dependencies:
 
@@ -21,50 +22,55 @@ Clone the repo:
 
     git clone https://github.com/kb100/youtubed.git
 
-They are bash scripts, so there is no need to compile, just put them somewhere in your path:
+Since the executables are bash scripts, there is no need to compile them.
+Just put them somewhere in your path:
 
     sudo cp youtubed/{youtubed,youtubed_controller} /usr/local/bin
 
-Edit your `i3blocks` config (e.g. `$HOME/.config/i3blocks/config`):
+Edit your i3blocks config (e.g. `$HOME/.config/i3blocks/config`):
 
     [youtube_controller]
     command=$SCRIPT_DIR/youtubed_controller
     interval=once
     signal=1
 
-Run the `youtubed` script:
+Run the youtubed script:
 
     youtubed --download-dir=$HOME/.youtubed --media-cmd="i3-msg exec mpv"
 
-where you can replace `mpv` with your favorite media player, or with `""` to disable automatic opening of files after download completes. 
-If you specify `--daemon-dir` you must also specify the same directory in the i3blocks blocklet command:
+where you can replace mpv with your favorite media player, or use `--media-cmd=""` to disable automatic opening of files after download completes. 
+If you specify `--daemon-dir`, you must also specify the same directory in the i3blocks blocklet command:
 
     command=$SCRIPT_DIR/youtubed_controller $DAEMON_DIR
 
-Restart `i3`:
+After you have setup your i3blocks configuration, restart i3 inplace:
 
     i3-msg restart
 
-Your `youtubed` is now running!
+Your youtubed setup is now running!
+You should now see `[DL]` in your status line.
 
 # USE
 
-Left click to trigger download of the video from your clipboard.
-Right click to cancel download of the video from your clipboard.
-These can also be done by sending `SIGUSR1` and `SIGUSR2` respectively, e.g.:
+Left click the blocklet to trigger a download of the video from your clipboard.
+Right click the blocklet to cancel a download of the video from your clipboard.
+These can also be done by sending SIGUSR1 and SIGUSR2 respectively, e.g.:
 
     pkill -SIGUSR1 youtubed
 
-or by sending commands directly to `youtubed`'s command fifo:
+or by sending commands directly to youtubed's command fifo:
 
     echo "download $URL" > $DAEMON_DIR/youtubed.fifo
 
-A simple "download" or "cancel" assumes the clipboard should be used.
-Alternatively you can specify  other signals with `--download-signal` and `--cancel-signal`.
-If already running, left clicking will gracefully restart youtube-dl
-and resume the download.
+A simple "download" or "cancel" command with no other arguments will use the clipboard's content's
+as the URL to download or cancel.
+You can specify alternative download and cancel signals with `--download-signal` and `--cancel-signal`.
+If youtubed is in the middle of a download, left clicking will either begin downloading the next video in parallel,
+or gracefully restart youtube-dl and resume the download if the video URL matches one that is already downloading.
+This is useful because sometimes youtube decides to throttle your download speed, and simply restarting the download
+may significantly increase your speeds.
 Multiple simultaneous downloads are supported, just copy URL, click, copy URL, click.
-Terminating `youtubed` can be done with a `SIGTERM` or by sending the message "die" to the fifo.
+Terminating youtubed can be done with a SIGTERM or by sending the message "die" to the fifo.
 
 # OPTIONS
 
@@ -90,6 +96,6 @@ Terminating `youtubed` can be done with a `SIGTERM` or by sending the message "d
 
 # BUGS
 
-Report bugs and suggests at the [issues](https://github.com/kb100/youtubed/issues) page.
-Try running `youtubed` with the `--run-in-foreground` flag for some helpful output.
+Report bugs and suggestions at the [issues](https://github.com/kb100/youtubed/issues) page.
+Try running youtubed with the `--run-in-foreground` flag for some helpful output, and be sure to include this output when reporting a bug.
 Fixes and other contributions are welcome.
