@@ -28,7 +28,7 @@ MEDIA_CMD="i3-msg exec mpv"
 
 
 function setup_options {
-    HELP_TEXT="Usage: youtubed options\n"
+    HELP_TEXT="Usage: youtubed options\n\n"
 
     function append_option {
         local SHORT=$1
@@ -56,23 +56,23 @@ function setup_options {
         HELP_TEXT="$HELP_TEXT$HELP_LINE\n"
     }
 
-    append_option h help "Print this help message."
-    append_option "" "download-signal:" "The signal that will trigger a "\
-"download. Default: $DOWNLOAD_SIGNAL"
-    append_option "" "cancel-signal:" "The signal that will cancel a "\
-"download. Default: $CANCEL_SIGNAL"
-    append_option "" "download-dir:" "The directory to save downloads in. "\
-"Default: \$XDG_DATA_DIR/youtubed" 
-    append_option "" "exec-after-write:" "A command to execute after "\
-"youtube-dl writes a status line. Default: $EXEC_AFTER_WRITE"
-    append_option "" "daemon-dir:" "The directory that youtubed keeps its "\
-"state files (.pid files, progress files, youtubed-fifo, status text "\
-"files). Default: \$XDG_RUNTIME_DIR/youtubed"
-    append_option "" "format-str:" "The format string to supply to "\
-"youtube-dl. Default: $FORMAT_STR"
-    append_option "" "media-cmd:" "Use \"media-cmd file\" to open a file "\
-"after download. Default: $MEDIA_CMD"
-    append_option "" "run-in-foreground" "Tells youtubed to stay in the "\
+    append_option h help "\t\tPrint this help message."
+    append_option "" "download-signal:" "\tThe signal that will trigger a "\
+"download.\n\t\t\tDefault: $DOWNLOAD_SIGNAL"
+    append_option "" "cancel-signal:" "\tThe signal that will cancel a "\
+"download.\n\t\t\tDefault: $CANCEL_SIGNAL"
+    append_option "" "download-dir:" "\t\tThe directory to save downloads in."\
+"\n\t\t\tDefault: \$XDG_DATA_DIR/youtubed" 
+    append_option "" "exec-after-write:" "\tA command to execute after "\
+"youtube-dl writes a status\n\t\t\tline.\n\t\t\tDefault: $EXEC_AFTER_WRITE"
+    append_option "" "daemon-dir:" "\t\tThe directory that youtubed keeps its "\
+"state files (.pid\n\t\t\tfiles, progress files, youtubed-fifo, status text"\
+"\n\t\t\tfiles).\n\t\t\tDefault: \$XDG_RUNTIME_DIR/youtubed"
+    append_option "" "format-str:" "\t\tThe format string to supply to "\
+"youtube-dl.\n\t\t\tDefault: $FORMAT_STR"
+    append_option "" "media-cmd:" "\t\tUse \"media-cmd file\" to open a file "\
+"after download.\n\t\t\tDefault: $MEDIA_CMD"
+    append_option "" "run-in-foreground" "\tTells youtubed to stay in the "\
 "foreground."
 }
 setup_options
