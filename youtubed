@@ -25,7 +25,7 @@ FIFO="youtubed.fifo"
 FORMAT_STR="%(title)s.%(id)s.%(resolution)s.%(ext)s"
 EXEC_AFTER_WRITE="pkill -RTMIN+1 i3blocks"
 MEDIA_CMD="i3-msg exec mpv"
-
+QUALITY_STR="bestvideo+bestaudio"
 
 function setup_options {
     HELP_TEXT="Usage: youtubed options\n\n"
@@ -70,6 +70,8 @@ function setup_options {
 "\n\t\t\tfiles).\n\t\t\tDefault: \$XDG_RUNTIME_DIR/youtubed"
     append_option "" "format-str:" "\t\tThe format string to supply to "\
 "youtube-dl.\n\t\t\tDefault: $FORMAT_STR"
+    append_option "" "default-quality:" "\tSet the default quality of videos "\
+"to download.\n\t\t\tDefault: $QUALITY_STR"
     append_option "" "media-cmd:" "\t\tUse \"media-cmd file\" to open a file "\
 "after download.\n\t\t\tDefault: $MEDIA_CMD"
     append_option "" "run-in-foreground" "\tTells youtubed to stay in the "\
@@ -112,6 +114,7 @@ function read_user_options {
             --exec-after-write) EXEC_AFTER_WRITE="$2"; shift 2 ;;
             --daemon-dir) DAEMON_DIR="$2"; shift 2 ;;
             --format-str) FORMAT_STR="$2"; shift 2 ;;
+            --default-quality) QUALITY_STR="$2"; shift 2 ;;
             --media-cmd) MEDIA_CMD="$2"; shift 2 ;;
             --run-in-foreground) RUN_IN_FOREGROUND=1; shift ;;
             -h|--help) usage; exit 0; ;;
@@ -154,29 +157,38 @@ function write_immediate {
     $EXEC_AFTER_WRITE
 }
 
+function write_immediate_temp {
+    local TMP_I3TEXT=$(mktemp -p "$DAEMON_DIR" "tmp.XXXXXXXX.i3text")
+    write_immediate "$TMP_I3TEXT" "$1"
+    
+    # auto remove after $2 seconds or echo name of temp for manual deletion 
+    if [ -n "$2" ]; then
+        sleep "$2" && rm "$TMP_I3TEXT" && $EXEC_AFTER_WRITE &
+    else
+        echo "$TMP_I3TEXT"
+    fi
+}
+
+
+
 function download {
     local URL=${1:-$(xclip -out)}
     info "Set URL: $URL"
-    local TMP_I3TEXT=$(mktemp -p "$DAEMON_DIR" "tmp.XXXXXXXX.i3text")
-    write_immediate "$TMP_I3TEXT" \
-        "$URL: getting filename"
-
+    local TMP_I3TEXT=$(write_immediate_temp "$URL: getting filename")
     local FILENAME=${2:-$(youtube-dl --get-filename --restrict-filenames \
-        -f bestvideo+bestaudio -o "%(id)s.%(ext)s" "$URL")}
+        -f "$QUALITY_STR" -o "%(id)s.%(ext)s" "$URL")}
     local YT_EXIT=$?
     info "Set FILENAME: $FILENAME"
+    
+    rm "$TMP_I3TEXT" 2> /dev/null
+    $EXEC_AFTER_WRITE
     
     # Don't do anything if the name lookup failed
     if [ "$YT_EXIT" -ne 0 ] || [ -z "$FILENAME" ]; then
         error "Couldn't download: $URL"
-        write_immediate "$TMP_I3TEXT" \
-            "Couldn't download: $URL"
-        sleep 2 && rm "$TMP_I3TEXT" && $EXEC_AFTER_WRITE &
+        write_immediate_temp "Couldn't download: $URL" "2"
         return
     fi
-
-    rm "$TMP_I3TEXT" 2> /dev/null
-    $EXEC_AFTER_WRITE
 
     if [ -f "$DAEMON_DIR"/"$FILENAME".pid ]; then
         info "Found ""$DAEMON_DIR"/"$FILENAME"".pid, "\
@@ -184,7 +196,7 @@ function download {
         cancel "$URL" "$FILENAME"
     fi
 
-    youtube-dl --newline --restrict-filenames -f bestvideo+bestaudio \
+    youtube-dl --newline --restrict-filenames -f "$QUALITY_STR" \
         -o "$DOWNLOAD_DIR"/"$FILENAME" "$URL" > \
         "$DAEMON_DIR"/"$FILENAME".progress &
     local PID=$!
@@ -211,12 +223,11 @@ function download {
         if [ -f "$DOWNLOAD_DIR"/"$FILENAME" ]; then
             info "Download appears to be successful, getting FULL_FILENAME"
             write_immediate "$DAEMON_DIR"/"$FILENAME".i3text \
-                "$FILENAME: Getting full filename" \
-                "$FILENAME: Getting full filename"
+                "$FILENAME: Getting full filename" 
             # youtube-dl (or rather ffmpeg) will fail at the merge step if 
             # filename is too long, hence the need for FULL_FILENAME
             FULL_FILENAME=$(youtube-dl --get-filename --restrict-filenames \
-                -f bestvideo+bestaudio -o "$FORMAT_STR" "$URL")
+                -f "$QUALITY_STR" -o "$FORMAT_STR" "$URL")
             info "Notifier for FILENAME=$FILENAME, PID=$PID: "\
 "FULL_FILENAME=$FULL_FILENAME"
             mv "$DOWNLOAD_DIR"/{"$FILENAME","$FULL_FILENAME"}
@@ -237,24 +248,21 @@ function download {
 function cancel {
     local URL=${1:-$(xclip -out)}
     info "Set URL: $URL"
-    local TMP_I3TEXT=$(mktemp -p "$DAEMON_DIR" "tmp.XXXXXXXX.i3text")
-    write_immediate "$TMP_I3TEXT" "$URL: Canceling"
+    local TMP_I3TEXT=$(write_immediate_temp "$URL: Canceling")
     local FILENAME=${2:-$(youtube-dl --get-filename --restrict-filenames \
-        -f bestvideo+bestaudio -o "%(id)s.%(ext)s" "$URL")}
+        -f "$QUALITY_STR" -o "%(id)s.%(ext)s" "$URL")}
     local YT_EXIT=$?
     info  "Set FILENAME: $FILENAME"
     
+    rm "$TMP_I3TEXT" 2> /dev/null
+    $EXEC_AFTER_WRITE
+
     # Don't do anything if the name lookup failed
     if [ "$YT_EXIT" -ne 0 ] || [ -z "$FILENAME" ]; then
         error "Couldn't cancel: $URL"
-        write_immediate "$TMP_I3TEXT" \
-            "Couldn't cancel: $URL"
-        sleep 2 && rm "$TMP_I3TEXT" && $EXEC_AFTER_WRITE &
+        write_immediate_temp "Couldn't cancel: $URL" "2"
         return
     fi
-
-    rm "$TMP_I3TEXT" 2> /dev/null
-    $EXEC_AFTER_WRITE
 
     if [ -f "$DAEMON_DIR"/"$FILENAME".pid ]; then
         kill $(cat "$DAEMON_DIR"/"$FILENAME".pid)
@@ -271,6 +279,23 @@ function cancel {
     rm "$DAEMON_DIR"/"$FILENAME".{pid,progress,i3text} 2> /dev/null
 }
 
+function quality {
+    QUALITY_STR="$1"
+    echo "$QUALITY_STR">"$DAEMON_DIR"/"quality"
+    write_immediate_temp "Quality set to $QUALITY_STR" "2"
+    info "Quality set to $QUALITY_STR"
+}
+
+function toggle_quality {
+    case "$QUALITY_STR" in
+        bestvideo+bestaudio) quality "bestaudio";;
+        bestaudio) quality "worstvideo+worstaudio";;
+        worstaudio+worstvideo) quality "worstaudio";;
+        worstaudio) quality "bestvideo+bestaudio";;
+        *) quality "bestvideo+bestaudio";;
+    esac
+}
+
 function die {
     shopt -s nullglob
     for pidfile in "$DAEMON_DIR"/*.pid; do
@@ -279,6 +304,7 @@ function die {
     pkill -SIGTERM -P $BASHPID
     rm "$DAEMON_DIR"/youtubed.dpid
     rm "$DAEMON_DIR"/"$FIFO"
+    rm "$DAEMON_DIR"/"quality" 2>/dev/null
     $EXEC_AFTER_WRITE
     exit 0
 }
@@ -295,6 +321,8 @@ function command_loop {
         case "$CMD" in
             download) download "$ARGS";;
             cancel) cancel "$ARGS";;
+            toggle_quality) toggle_quality;;
+            quality) quality "$ARGS";;
             die) die;;
         esac
     }   
@@ -302,6 +330,10 @@ function command_loop {
     while true; do
         read line <"$DAEMON_DIR"/"$FIFO" && dispatch_command $line &
         wait
+        if [ -f "$DAEMON_DIR"/"quality" ]; then
+            QUALITY_STR=$(cat "$DAEMON_DIR"/"quality")
+            rm "$DAEMON_DIR"/"quality"
+        fi
     done
 }
 

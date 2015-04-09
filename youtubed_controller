@@ -60,6 +60,7 @@ function send_command {
 case "$BLOCK_BUTTON" in
     1) send_command download ;;
     3) send_command cancel ;;
+    4) send_command toggle_quality ;;
 esac
 
 
