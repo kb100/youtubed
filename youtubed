@@ -326,8 +326,8 @@ function command_loop {
     }   
 
     while true; do
-        read line <"$DAEMON_DIR"/"$FIFO" && sync && dispatch_command $line &
-        wait $!
+        read line <"$DAEMON_DIR"/"$FIFO" && dispatch_command $line &
+        wait 
         if [ -f "$DAEMON_DIR"/"quality" ]; then
             QUALITY_STR=$(cat "$DAEMON_DIR"/"quality")
             rm "$DAEMON_DIR"/"quality"
