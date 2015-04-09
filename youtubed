@@ -300,12 +300,12 @@ function die {
         kill $(cat $pidfile)
     done
     pkill -SIGTERM -P $BASHPID
-    rm "$DAEMON_DIR"/youtubed.dpid
-    rm "$DAEMON_DIR"/"$FIFO"
+    rm "$DAEMON_DIR"/youtubed.dpid 2>/dev/null
+    rm "$DAEMON_DIR"/"$FIFO" 2>/dev/null
     rm "$DAEMON_DIR"/"quality" 2>/dev/null
-    rm "$DAEMON_DIR"/*.i3text
-    rm "$DAEMON_DIR"/*.progress
-    rm "$DAEMON_DIR"/*.pid
+    rm "$DAEMON_DIR"/*.i3text 2>/dev/null
+    rm "$DAEMON_DIR"/*.progress 2>/dev/null
+    rm "$DAEMON_DIR"/*.pid 2>/dev/null
     $EXEC_AFTER_WRITE
     exit 0
 }
@@ -320,8 +320,8 @@ function command_loop {
         local CMD=$(cut -d ' ' -f 1 <<< "$1")
         local ARGS=$(cut -d ' ' -sf 2- <<< "$1")
         case "$CMD" in
-            download) download "$ARGS";;
-            cancel) cancel "$ARGS";;
+            download) download "$ARGS" &;;
+            cancel) cancel "$ARGS" &;;
             toggle_quality) toggle_quality;;
             quality) quality "$ARGS";;
             die) die;;
@@ -329,17 +329,12 @@ function command_loop {
     }   
 
     while true; do
-        (
-            read line <"$DAEMON_DIR"/"$FIFO"
-            (
-                dispatch_command $line
-                if [ -f "$DAEMON_DIR"/"quality" ]; then
-                    QUALITY_STR=$(cat "$DAEMON_DIR"/"quality")
-                    rm "$DAEMON_DIR"/"quality"
-                fi
-            ) &
-        ) &
+        read line <"$DAEMON_DIR"/"$FIFO" && dispatch_command $line &
         wait $! 
+        if [ -f "$DAEMON_DIR"/"quality" ]; then
+            QUALITY_STR=$(cat "$DAEMON_DIR"/"quality")
+            rm "$DAEMON_DIR"/"quality"
+        fi
     done
 }
 
