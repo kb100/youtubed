@@ -105,19 +105,25 @@ You can also send "toggle_quality" to the fifo to automatically switch between t
 # OPTIONS
 
     -h --help           Print this help message.
+
     --download-signal   The signal that will trigger a download.
                         Default: SIGUSR1
+    
     --cancel-signal     The signal that will cancel a download.
                         Default: SIGUSR2
+    
     --download-dir      The directory to save downloads in.
                         Default: $XDG_DATA_DIR/youtubed
+    
     --exec-after-write  A command to execute after youtube-dl writes a status
                         line. 
                         Default: pkill -RTMIN+1 i3blocks
+    
     --daemon-dir        The directory that youtubed keeps its state files 
                         (.pid files, progress files, youtubed-fifo, status text
                         files). 
                         Default: $XDG_RUNTIME_DIR/youtubed
+    
     --format-str        The format string to supply to youtube-dl. 
                         Default: %(title)s.%(id)s.%(resolution)s.%(ext)s
 
@@ -126,6 +132,7 @@ You can also send "toggle_quality" to the fifo to automatically switch between t
 
     --media-cmd         Use "media-cmd file" to open a file after download.
                         Default: i3-msg exec mpv
+    
     --run-in-foreground Tells youtubed to stay in the foreground.
 
 # BUGS
