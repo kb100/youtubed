@@ -303,9 +303,9 @@ function die {
     rm "$DAEMON_DIR"/youtubed.dpid
     rm "$DAEMON_DIR"/"$FIFO"
     rm "$DAEMON_DIR"/"quality" 2>/dev/null
-    rm "$DAEMON_DIR"/"*.i3text"
-    rm "$DAEMON_DIR"/"*.progress"
-    rm "$DAEMON_DIR"/"*.pid"
+    rm "$DAEMON_DIR"/*.i3text
+    rm "$DAEMON_DIR"/*.progress
+    rm "$DAEMON_DIR"/*.pid
     $EXEC_AFTER_WRITE
     exit 0
 }
