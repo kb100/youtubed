@@ -96,6 +96,12 @@ may significantly increase your speeds.
 Multiple simultaneous downloads are supported, just copy URL, click, copy URL, click.
 Terminating youtubed can be done with a SIGTERM or by sending the message "die" to the fifo.
 
+By default, youtubed will tell youtube-dl to get the best quality video and audio to download.
+You can use your mouse wheel and scroll  up over the blocklet to change between: bestvideo+bestaudio, bestaudio, worstvideo+worstaudio, and worstaudio.
+You can also specify a custom quality with the `--default-quality` flag or by sending "quality FORMAT" to the fifo.
+The format must be a valid youtube-dl format string (see the `--format` option in youtube-dl's man page.
+You can also send "toggle_quality" to the fifo) to automatically switch between the formats listed above.
+
 # OPTIONS
 
     -h --help           Print this help message.
@@ -114,6 +120,10 @@ Terminating youtubed can be done with a SIGTERM or by sending the message "die" 
                         Default: $XDG_RUNTIME_DIR/youtubed
     --format-str        The format string to supply to youtube-dl. 
                         Default: %(title)s.%(id)s.%(resolution)s.%(ext)s
+
+    --default-quality   Set the default quality of videos to download.
+                        Default: bestvideo+bestaudio
+
     --media-cmd         Use "media-cmd file" to open a file after download.
                         Default: i3-msg exec mpv
     --run-in-foreground Tells youtubed to stay in the foreground.
