@@ -12,7 +12,8 @@ Development copy, expect bugs.
 # INSTALLATION
 
 These scripts were written to be used with [i3](http://www.i3wm.org) and [i3blocks](https://github.com/vivien/i3blocks), so we assume you have a working installation of each.
-It is possible to use youtubed
+It is possible to use youtubed with other status line displayers besides i3blocks, but we will not go into detail about how to do so.
+With that in mind, let's get started.
 
 Install the dependencies:
 
@@ -94,7 +95,7 @@ or gracefully restart youtube-dl and resume the download if the video URL matche
 This is useful because sometimes youtube decides to throttle your download speed, and simply restarting the download
 may significantly increase your speeds.
 Multiple simultaneous downloads are supported, just copy URL, click, copy URL, click.
-Terminating youtubed can be done with a SIGTERM or by sending the message "die" to the fifo.
+Terminating youtubed can be done with a SIGTERM, with a SIGINT (CTRL-C) if youtubed is running in the foreground, or by sending the message "die" to the fifo.
 
 By default, youtubed will tell youtube-dl to get the best quality video and audio to download.
 You can use your mouse wheel and scroll  up over the blocklet to change between: bestvideo+bestaudio, bestaudio, worstvideo+worstaudio, and worstaudio.
