@@ -99,8 +99,8 @@ Terminating youtubed can be done with a SIGTERM or by sending the message "die" 
 By default, youtubed will tell youtube-dl to get the best quality video and audio to download.
 You can use your mouse wheel and scroll  up over the blocklet to change between: bestvideo+bestaudio, bestaudio, worstvideo+worstaudio, and worstaudio.
 You can also specify a custom quality with the `--default-quality` flag or by sending "quality FORMAT" to the fifo.
-The format must be a valid youtube-dl format string (see the `--format` option in youtube-dl's man page.
-You can also send "toggle_quality" to the fifo) to automatically switch between the formats listed above.
+The format must be a valid youtube-dl format string (see the `--format` option in youtube-dl's man page).
+You can also send "toggle_quality" to the fifo to automatically switch between the formats listed above.
 
 # OPTIONS
 
