@@ -169,8 +169,6 @@ function write_immediate_temp {
     fi
 }
 
-
-
 function download {
     local URL=${1:-$(xclip -out | tr -cd "[:print:]")}
     info "Set URL: $URL"
@@ -312,7 +310,7 @@ function die {
 function command_loop {   
     trap download "$DOWNLOAD_SIGNAL"
     trap cancel "$CANCEL_SIGNAL"
-    trap die SIGTERM
+    trap die SIGTERM SIGINT
 
     function dispatch_command {
         info "Received command: $1"
