@@ -303,6 +303,9 @@ function die {
     rm "$DAEMON_DIR"/youtubed.dpid
     rm "$DAEMON_DIR"/"$FIFO"
     rm "$DAEMON_DIR"/"quality" 2>/dev/null
+    rm "$DAEMON_DIR"/"*.i3text"
+    rm "$DAEMON_DIR"/"*.progress"
+    rm "$DAEMON_DIR"/"*.pid"
     $EXEC_AFTER_WRITE
     exit 0
 }
@@ -326,15 +329,15 @@ function command_loop {
     }   
 
     while true; do
+        if [ -f "$DAEMON_DIR"/"quality" ]; then
+            QUALITY_STR=$(cat "$DAEMON_DIR"/"quality")
+            rm "$DAEMON_DIR"/"quality"
+        fi
         (
             read line <"$DAEMON_DIR"/"$FIFO"
             dispatch_command $line &
         ) &
         wait $! 
-        if [ -f "$DAEMON_DIR"/"quality" ]; then
-            QUALITY_STR=$(cat "$DAEMON_DIR"/"quality")
-            rm "$DAEMON_DIR"/"quality"
-        fi
     done
 }
 
