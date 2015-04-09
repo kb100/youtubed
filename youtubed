@@ -172,7 +172,7 @@ function write_immediate_temp {
 
 
 function download {
-    local URL=${1:-$(xclip -out)}
+    local URL=${1:-$(xclip -out | tr -cd "[:print:]")}
     info "Set URL: $URL"
     local TMP_I3TEXT=$(write_immediate_temp "$URL: getting filename")
     local FILENAME=${2:-$(youtube-dl --get-filename --restrict-filenames \
@@ -246,7 +246,7 @@ function download {
 }
 
 function cancel {
-    local URL=${1:-$(xclip -out)}
+    local URL=${1:-$(xclip -out | tr -cd "[:print:]")}
     info "Set URL: $URL"
     local TMP_I3TEXT=$(write_immediate_temp "$URL: Canceling")
     local FILENAME=${2:-$(youtube-dl --get-filename --restrict-filenames \
