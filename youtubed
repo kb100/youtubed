@@ -143,6 +143,16 @@ function setup_sane_running_conditions {
 "--daemon-dir (and --download-dir, unless you are sure you won't be "\
 "attempting to download the same video in more than one daemon."
 
+    command -v youtube-dl &>/dev/null || error_and_exit \
+        "Dependency not found: youtube-dl (typically in package youtube-dl)."
+
+    command -v xclip &>/dev/null || error_and_exit \
+        "Dependency not found: xclip (typically in package xclip)."
+
+    command -v inotifywait &>/dev/null || error_and_exit \
+        "Dependency not found: inotifywait (typically in package "\
+"inotify-tools)."
+
     mkfifo -m=600 "$DAEMON_DIR"/"$FIFO" || error_and_exit \
         "Failed to make fifo: ""$DAEMON_DIR"/"$FIFO."
 }
