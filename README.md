@@ -6,7 +6,7 @@ Development copy, expect bugs.
 
 - [INSTALLATION] (#installation)
 - [USE] (#use)
-- [USE WITH TOR] (#use_with_tor)
+- [USE WITH TOR] (#use-with-tor)
 - [OPTIONS] (#options)
 - [BUGS] (#bugs)
 
@@ -113,10 +113,10 @@ Of course you will need to install them first:
 sudo aptitude install tor torsocks
 ```
 
-The correct way to spawn youtubed for use with tor is simply to prepend torsocks to whatever the youtubed command you want to initiate:
+The correct way to spawn youtubed for use with tor is simply to prepend torsocks to your youtubed call:
 
 ```ShellSession
-torsocks youtubed --download-dir=$HOME/.youtubed --media-cmd="i3-msg exec mpv" --default-quality="worstvideo+worstaudio"
+torsocks youtubed [usual options] [--default-quality="worstvideo+worstaudio"]
 ```
 
 Please be mindful that the tor network is not (yet) equipped for high bandwidth users, so be considerate and set the download quality to worstvideo+worstaudio or worstaudio when using tor.
