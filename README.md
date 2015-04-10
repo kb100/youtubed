@@ -6,6 +6,7 @@ Development copy, expect bugs.
 
 - [INSTALLATION] (#installation)
 - [USE] (#use)
+- [USE WITH TOR] (#use_with_tor)
 - [OPTIONS] (#options)
 - [BUGS] (#bugs)
 
@@ -102,6 +103,26 @@ You can use your mouse wheel and scroll  up over the blocklet to change between:
 You can also specify a custom quality with the `--default-quality` flag or by sending "quality FORMAT" to the fifo.
 The format must be a valid youtube-dl format string (see the `--format` option in youtube-dl's man page).
 You can also send "toggle_quality" to the fifo to automatically switch between the formats listed above.
+
+# USE WITH TOR
+
+We recommend the use of [tor](https://www.torproject.org/) and torsocks in combination with youtubed.
+Of course you will need to install them first:
+
+```ShellSession
+sudo aptitude install tor torsocks
+```
+
+The correct way to spawn youtubed for use with tor is simply to prepend torsocks to whatever the youtubed command you want to initiate:
+
+```ShellSession
+torsocks youtubed --download-dir=$HOME/.youtubed --media-cmd="i3-msg exec mpv" --default-quality="worstvideo+worstaudio"
+```
+
+Please be mindful that the tor network is not (yet) equipped for high bandwidth users, so be considerate and set the download quality to worstvideo+worstaudio or worstaudio when using tor.
+This can be accomplished with the `--default-quality` option as above.
+
+**WARNING: by nature of how youtubed works, the contents of your clipboard may be sent over the tor network upon executing a youtubed command. If your clipboard contains sensitive or identifying information, this could be a serious problem for you. There are currently no safety checks in place to stop you from revealing your clipboard should you accidentally click the blocklet.**
 
 # OPTIONS
 
