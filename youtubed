@@ -27,7 +27,6 @@ FORMAT_STR="%(title)s.%(id)s.%(resolution)s.%(ext)s"
 EXEC_AFTER_WRITE="pkill -RTMIN+1 i3blocks"
 MEDIA_CMD="i3-msg exec mpv"
 QUALITY_STR="bestvideo+bestaudio"
-TOR_ENABLED=""
 
 function setup_options {
     HELP_TEXT="Usage: youtubed options\n\n"
