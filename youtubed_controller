@@ -34,9 +34,8 @@ if [ -d "$DAEMON_DIR" ]; then
 fi
 
 if [ "$BAD_SETUP" == "1" ]; then
-    echo "No youtubed running in ""$DAEMON_DIR"
-    echo "No youtubed running in ""$DAEMON_DIR"
-    echo "#FF0000"
+    echo "<span color='red'>No youtubed running in $DAEMON_DIR</span>"
+    echo "<span color='red'>No youtubed running in $DAEMON_DIR</span>"
     exit 0
 fi
 
@@ -44,13 +43,11 @@ FULL_TEXT=""
 SHORT_TEXT=""
 SEPARATOR="|"
 STATUS_STR="[DL]"
-COLOR="#FFFFFF"
 
 function send_command {
     if [ ! -p "$FIFO" ]; then
-        echo "fifo not found: $FIFO"
-        echo "fifo not found: $FIFO"
-        echo "FF0000"
+        echo "<span color='red'>fifo not found: $FIFO</span>"
+        echo "<span color='red'>fifo not found: $FIFO</span>"
         exit 0
     fi
 
@@ -63,37 +60,28 @@ case "$BLOCK_BUTTON" in
     4) send_command toggle_quality ;;
 esac
 
+function append_to_with_sep {
+    local TEXT="$2"
+    local TO_APPEND="$1"
+    if [ -n "$TEXT" ]; then
+        TEXT="$TEXT $SEPARATOR $TO_APPEND"
+    else
+        TEXT="$TO_APPEND"
+    fi
+    echo "$TEXT"
+}
 
 for f in "$DAEMON_DIR"/*.i3text; do
     TEXT=$(head -n 1 $f)
-    if [ -n "$FULL_TEXT" ]; then
-        FULL_TEXT="$FULL_TEXT $SEPARATOR $TEXT"
-    else
-        COLOR="#FFFF00"
-        FULL_TEXT="$TEXT"
-    fi
-done
-if [ -n "$FULL_TEXT" ]; then
-    FULL_TEXT="$FULL_TEXT $SEPARATOR $STATUS_STR"
-else
-    FULL_TEXT="$STATUS_STR"
-fi
+    FULL_TEXT=$(append_to_with_sep "$TEXT" "$FULL_TEXT")
 
-for f in "$DAEMON_DIR"/*.i3text; do
-    TEXT=$(tail -n 1 $f)
-    if [ -n "$SHORT_TEXT" ]; then
-        SHORT_TEXT="$SHORT_TEXT $SEPARATOR $TEXT"
-    else
-        SHORT_TEXT="$TEXT"
-    fi
+    STEXT=$(tail -n 1 $f)
+    SHORT_TEXT=$(append_to_with_sep "$STEXT" "$SHORT_TEXT")
 done
-if [ -n "$SHORT_TEXT" ]; then
-    SHORT_TEXT="$SHORT_TEXT $SEPARATOR $STATUS_STR"
-else
-    SHORT_TEXT="$STATUS_STR"
-fi
+
+FULL_TEXT=$(append_to_with_sep "$STATUS_STR" "$FULL_TEXT")
+SHORT_TEXT=$(append_to_with_sep "$STATUS_STR" "$SHORT_TEXT")
 
 echo "$FULL_TEXT"
 echo "$SHORT_TEXT"
-echo "$COLOR"
 exit 0

@@ -98,6 +98,10 @@ function info {
     echo "[youtubed] $1"
 }
 
+function pango {
+    echo "<span color='$1'>$2</span>"
+}
+
 function read_user_options {
     OPTS=`getopt -o $SHORTOPTS -l $LONGOPTS -- "$@"`
     if [ $? != 0 ]; then
@@ -183,7 +187,8 @@ function write_immediate_temp {
 function download {
     local URL=${1:-$(xclip -out | tr -cd "[:print:]")}
     info "Set URL: $URL"
-    local TMP_I3TEXT=$(write_immediate_temp "$URL: getting filename")
+    local TMP_I3TEXT=$(write_immediate_temp \
+        "$(pango yellow "$URL: getting filename")")
     local FILENAME=${2:-$(youtube-dl --get-filename --restrict-filenames \
         -f "$QUALITY_STR" -o "%(id)s.%(ext)s" "$URL")}
     local YT_EXIT=$?
@@ -195,7 +200,7 @@ function download {
     # Don't do anything if the name lookup failed
     if [ "$YT_EXIT" -ne 0 ] || [ -z "$FILENAME" ]; then
         error "Couldn't download: $URL"
-        write_immediate_temp "Couldn't download: $URL" "2"
+        write_immediate_temp "$(pango red "Couldn't download: $URL")" "2"
         return
     fi
 
@@ -222,7 +227,8 @@ function download {
             #TODO make prettier progress
             if [ -n "$PROGRESS" ]; then
                 write_immediate "$DAEMON_DIR"/"$FILENAME".i3text \
-                    "$FILENAME: $PROGRESS" "$PROGRESS"
+                    "$(pango yellow "$FILENAME: $PROGRESS")" \
+                    "$(pango yellow "$FILENAME: $PROGRESS")"
             fi
         done
         
@@ -232,7 +238,7 @@ function download {
         if [ -f "$DOWNLOAD_DIR"/"$FILENAME" ]; then
             info "Download appears to be successful, getting FULL_FILENAME"
             write_immediate "$DAEMON_DIR"/"$FILENAME".i3text \
-                "$FILENAME: Getting full filename" 
+                "$(pango yellow "$FILENAME: Getting full filename")" 
             # youtube-dl (or rather ffmpeg) will fail at the merge step if 
             # filename is too long, hence the need for FULL_FILENAME
             FULL_FILENAME=$(youtube-dl --get-filename --restrict-filenames \
@@ -240,6 +246,7 @@ function download {
             info "Notifier for FILENAME=$FILENAME, PID=$PID: "\
 "FULL_FILENAME=$FULL_FILENAME"
             mv "$DOWNLOAD_DIR"/{"$FILENAME","$FULL_FILENAME"}
+            write_immediate_temp "$(pango "#00FF00" "$FULL_FILENAME: done")" "2"
             if [ -n "$MEDIA_CMD" ]; then
                 info "Notifier for FILENAME=$FILENAME, PID=$PID: "\
 "Found media command, executing"
@@ -257,7 +264,7 @@ function download {
 function cancel {
     local URL=${1:-$(xclip -out | tr -cd "[:print:]")}
     info "Set URL: $URL"
-    local TMP_I3TEXT=$(write_immediate_temp "$URL: Canceling")
+    local TMP_I3TEXT=$(write_immediate_temp "$(pango red "$URL: Canceling")")
     local FILENAME=${2:-$(youtube-dl --get-filename --restrict-filenames \
         -f "$QUALITY_STR" -o "%(id)s.%(ext)s" "$URL")}
     local YT_EXIT=$?
@@ -269,7 +276,7 @@ function cancel {
     # Don't do anything if the name lookup failed
     if [ "$YT_EXIT" -ne 0 ] || [ -z "$FILENAME" ]; then
         error "Couldn't cancel: $URL"
-        write_immediate_temp "Couldn't cancel: $URL" "2"
+        write_immediate_temp "$(pango red "Couldn't cancel: $URL")" "2"
         return
     fi
 
@@ -291,7 +298,7 @@ function cancel {
 function quality {
     QUALITY_STR="$1"
     echo "$QUALITY_STR">"$DAEMON_DIR"/"quality"
-    write_immediate_temp "Quality set to $QUALITY_STR" "2"
+    write_immediate_temp "$(pango white "Quality set to $QUALITY_STR")" "2"
     info "Quality set to $QUALITY_STR"
 }
 
