@@ -125,7 +125,7 @@ torsocks youtubed [usual options] [--default-quality="worstvideo+worstaudio"] [-
 Please be mindful that the tor network is not (yet) equipped for high bandwidth users, so be considerate and set the download quality to worstvideo+worstaudio or worstaudio when using tor.
 This can be accomplished with the `--default-quality` option as above.
 
-**WARNING: by nature of how youtubed works, the contents of your clipboard may be sent over the tor network upon executing a youtubed command. If your clipboard contains sensitive or identifying information, this could be a serious problem for you. We strongly suggest using a domain whitelist to prevent yourself from revealing your clipboard should you accidentally click the blocklet.**
+**WARNING: by nature of how youtubed works, the contents of your clipboard may be sent over the tor network upon executing a youtubed command. If your clipboard contains sensitive or identifying information, this could be a serious problem for you. We strongly suggest using the `--domain whitelist` option as above to prevent yourself from revealing your clipboard should you accidentally click the blocklet.**
 
 Whitelist files should be lines with domain names one per line. Lines beginning with '#' are ignored.
 
