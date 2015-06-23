@@ -24,6 +24,8 @@ DOWNLOAD_SIGNAL="SIGUSR1"
 CANCEL_SIGNAL="SIGUSR2"
 FIFO="youtubed.fifo"
 FORMAT_STR="%(title)s.%(id)s.%(resolution)s.%(ext)s"
+ID_ONLY_FMT="%(id)s"
+MERGE_OUTPUT_FORMAT="mkv"
 EXEC_AFTER_WRITE="pkill -RTMIN+1 i3blocks"
 MEDIA_CMD="i3-msg exec mpv"
 QUALITY_STR="bestvideo+bestaudio"
@@ -190,7 +192,8 @@ function download {
     local TMP_I3TEXT=$(write_immediate_temp \
         "$(pango yellow "$URL: getting filename")")
     local FILENAME=${2:-$(youtube-dl --get-filename --restrict-filenames \
-        -f "$QUALITY_STR" -o "%(id)s.%(ext)s" "$URL")}
+        -f "$QUALITY_STR" -o "$ID_ONLY_FMT" \
+        --merge-output-format "$MERGE_FORMAT_STR" "$URL")}
     local YT_EXIT=$?
     info "Set FILENAME: $FILENAME"
     
@@ -211,7 +214,9 @@ function download {
     fi
 
     youtube-dl --newline --restrict-filenames -f "$QUALITY_STR" \
-        -o "$DOWNLOAD_DIR"/"$FILENAME" "$URL" > \
+        -o "$DOWNLOAD_DIR"/"$FILENAME" \
+        --merge-output-format="$MERGE_OUTPUT_FORMAT" \
+        "$URL" > \
         "$DAEMON_DIR"/"$FILENAME".progress &
     local PID=$!
     info "Spawned youtube-dl with PID: $PID"
@@ -226,33 +231,48 @@ function download {
             PROGRESS=$(tail -n1 "$DAEMON_DIR"/"$FILENAME".progress 2> /dev/null)
             #TODO make prettier progress
             if [ -n "$PROGRESS" ]; then
+                info "$FILENAME: $PROGRESS"
                 write_immediate "$DAEMON_DIR"/"$FILENAME".i3text \
                     "$(pango yellow "$FILENAME: $PROGRESS")" \
                     "$(pango yellow "$FILENAME: $PROGRESS")"
             fi
         done
         
-        info "Notifier for FILENAME=$FILENAME, PID=$PID: done notifying"
+        local MERGE_REQUIRED=1
+        local MERGE_NAME="$FILENAME"
+        if [ ! -f "$DOWNLOAD_DIR"/"$FILENAME" ] && \
+            [ -f "$DOWNLOAD_DIR"/"$FILENAME.$MERGE_OUTPUT_FORMAT" ]; then
+            info "$FILENAME: $MERGE_OUTPUT_FORMAT merge was required"
+            MERGE_NAME="$FILENAME.$MERGE_OUTPUT_FORMAT"
+            MERGE_REQUIRED=0
+        fi
 
         # If download was successful, rename and watch your video
-        if [ -f "$DOWNLOAD_DIR"/"$FILENAME" ]; then
-            info "Download appears to be successful, getting FULL_FILENAME"
+        if [ -f "$DOWNLOAD_DIR"/"$MERGE_NAME" ]; then
+            info "$MERGE_NAME: Download appears to be successful"
+            info "$MERGE_NAME: getting FULL_FILENAME"
             write_immediate "$DAEMON_DIR"/"$FILENAME".i3text \
                 "$(pango yellow "$FILENAME: Getting full filename")" 
             # youtube-dl (or rather ffmpeg) will fail at the merge step if 
             # filename is too long, hence the need for FULL_FILENAME
             FULL_FILENAME=$(youtube-dl --get-filename --restrict-filenames \
                 -f "$QUALITY_STR" -o "$FORMAT_STR" "$URL")
-            info "Notifier for FILENAME=$FILENAME, PID=$PID: "\
-"FULL_FILENAME=$FULL_FILENAME"
-            mv "$DOWNLOAD_DIR"/{"$FILENAME","$FULL_FILENAME"}
+            if [ $MERGE_REQUIRED -eq "0" ]; then
+                FULL_FILENAME="$FULL_FILENAME.$MERGE_OUTPUT_FORMAT"
+            fi
+            mv "$DOWNLOAD_DIR"/{"$MERGE_NAME","$FULL_FILENAME"}
             write_immediate_temp "$(pango "#00FF00" "$FULL_FILENAME: done")" "2"
             if [ -n "$MEDIA_CMD" ]; then
                 info "Notifier for FILENAME=$FILENAME, PID=$PID: "\
 "Found media command, executing"
                 bash -c "$MEDIA_CMD ""$DOWNLOAD_DIR"/"$FULL_FILENAME"
             fi
+        else
+            info "$FILENAME: Download appears to be unsuccessful,"\
+                "possibly because another thread cancelled it."
         fi
+
+        info "Notifier for FILENAME=$FILENAME, PID=$PID: done notifying"
         
         rm "$DAEMON_DIR"/"$FILENAME".{pid,progress,i3text} 2> /dev/null
         $EXEC_AFTER_WRITE
@@ -266,9 +286,9 @@ function cancel {
     info "Set URL: $URL"
     local TMP_I3TEXT=$(write_immediate_temp "$(pango red "$URL: Canceling")")
     local FILENAME=${2:-$(youtube-dl --get-filename --restrict-filenames \
-        -f "$QUALITY_STR" -o "%(id)s.%(ext)s" "$URL")}
+        -f "$QUALITY_STR" -o "$ID_ONLY_FMT" "$URL")}
     local YT_EXIT=$?
-    info  "Set FILENAME: $FILENAME"
+    info "Set FILENAME: $FILENAME"
     
     rm "$TMP_I3TEXT" 2> /dev/null
     $EXEC_AFTER_WRITE
@@ -293,6 +313,7 @@ function cancel {
     fi
 
     rm "$DAEMON_DIR"/"$FILENAME".{pid,progress,i3text} 2> /dev/null
+    info "$FILENAME: Cancel complete"
 }
 
 function quality {
