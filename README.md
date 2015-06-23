@@ -41,6 +41,7 @@ Edit your i3blocks config (e.g. `$HOME/.config/i3blocks/config`):
 [youtube_controller]
 command=$SCRIPT_DIR/youtubed_controller
 interval=once
+markup=pango
 signal=1
 # use pkill -RTMIN+1 i3blocks to trigger a block update
 ```
