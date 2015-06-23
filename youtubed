@@ -6,7 +6,7 @@
 # in your clipboard. (Should work with any youtube-dl compatible URL.)
 #
 # Depends: youtube-dl, inotify-tools, xclip
-# Recommends: mpv | vlc, i3, i3blocks
+# Recommends: mpv | vlc, i3, i3blocks, python3
 # Suggests: tor, torsocks
 #
 # ./youtubed --download-dir=/data/videos/youtube
@@ -28,6 +28,7 @@ ID_ONLY_FMT="%(id)s"
 MERGE_OUTPUT_FORMAT="mkv"
 EXEC_AFTER_WRITE="pkill -RTMIN+1 i3blocks"
 MEDIA_CMD="i3-msg exec mpv"
+DOMAIN_WHITELIST=""
 QUALITY_STR="bestvideo+bestaudio"
 
 function setup_options {
@@ -77,6 +78,8 @@ function setup_options {
 "to download.\n\t\t\tDefault: $QUALITY_STR\n"
     append_option "" "media-cmd:" "\t\tUse \"media-cmd file\" to open a file "\
 "after download.\n\t\t\tDefault: $MEDIA_CMD\n"
+    append_option "" "domain-whitelist:" "\tReject url unless its domain is in "\
+"the given file.\n\t\t\tDefault: $DOMAIN_WHITELIST\n"
     append_option "" "run-in-foreground" "\tTells youtubed to stay in the "\
 "foreground."
 }
@@ -123,6 +126,7 @@ function read_user_options {
             --format-str) FORMAT_STR="$2"; shift 2 ;;
             --default-quality) QUALITY_STR="$2"; shift 2 ;;
             --media-cmd) MEDIA_CMD="$2"; shift 2 ;;
+            --domain-whitelist) DOMAIN_WHITELIST="$2"; shift 2 ;;
             --run-in-foreground) RUN_IN_FOREGROUND=1; shift ;;
             -h|--help) usage; exit 0; ;;
             --) shift; break;;
@@ -149,6 +153,13 @@ function setup_sane_running_conditions {
 "Expert users may run multiple youtubed by specifying a unique "\
 "--daemon-dir (and --download-dir, unless you are sure you won't be "\
 "attempting to download the same video in more than one daemon."
+
+    if [ -n "$DOMAIN_WHITELIST" ]; then
+        command -v python3 &>/dev/null || error_and_exit \
+"Dependency not found: python3"
+        test -f "$DOMAIN_WHITELIST" || error_and_exit \
+"Domain whitelist file $DOMAIN_WHITELIST not found."
+    fi
 
     command -v youtube-dl &>/dev/null || error_and_exit \
         "Dependency not found: youtube-dl (typically in package youtube-dl)."
@@ -186,9 +197,24 @@ function write_immediate_temp {
     fi
 }
 
+function valid_URL {
+    local URL=$1
+    if [ -n "$DOMAIN_WHITELIST" ]; then
+        python3 validate-url.py "$URL" "$DOMAIN_WHITELIST"
+        return $?
+    fi
+    return 0
+}
+
+
 function download {
-    local URL=${1:-$(xclip -out | tr -cd "[:print:]")}
+    local URL=${1:-$(xclip -out 2>/dev/null | tr -cd "[:print:]")}
     info "Set URL: $URL"
+    if ! valid_URL "$URL"; then
+        info "$URL: bad URL"
+        write_immediate_temp "$(pango red "Bad URL: $URL")" "2"
+        return
+    fi
     local TMP_I3TEXT=$(write_immediate_temp \
         "$(pango yellow "$URL: getting filename")")
     local FILENAME=${2:-$(youtube-dl --get-filename --restrict-filenames \
@@ -269,7 +295,7 @@ function download {
             fi
         else
             info "$FILENAME: Download appears to be unsuccessful,"\
-                "possibly because another thread cancelled it."
+"possibly because another thread cancelled it."
         fi
 
         info "Notifier for FILENAME=$FILENAME, PID=$PID: done notifying"
@@ -282,8 +308,13 @@ function download {
 }
 
 function cancel {
-    local URL=${1:-$(xclip -out | tr -cd "[:print:]")}
+    local URL=${1:-$(xclip -out 2>/dev/null | tr -cd "[:print:]")}
     info "Set URL: $URL"
+    if ! valid_URL "$URL"; then
+        info "$URL: bad URL"
+        write_immediate_temp "$(pango red "Bad URL: $URL")" "2"
+        return
+    fi
     local TMP_I3TEXT=$(write_immediate_temp "$(pango red "$URL: Canceling")")
     local FILENAME=${2:-$(youtube-dl --get-filename --restrict-filenames \
         -f "$QUALITY_STR" -o "$ID_ONLY_FMT" "$URL")}

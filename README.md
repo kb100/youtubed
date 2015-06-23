@@ -28,12 +28,14 @@ Clone the repo:
 git clone https://github.com/kb100/youtubed.git
 ```
 
-Since the executables are bash scripts, there is no need to compile them.
-Just put them somewhere in your path:
+No need to compile anything, just put the scripts somewhere in your path:
 
 ```ShellSession
-sudo cp youtubed/{youtubed,youtubed_controller} /usr/local/bin
+sudo cp youtubed/{youtubed,youtubed_controller,youtubed_validate-url.py} /usr/local/bin
 ```
+
+You only need the url validator if you plan on using the `--domain-whitelist` option.
+
 
 Edit your i3blocks config (e.g. `$HOME/.config/i3blocks/config`):
 
@@ -114,16 +116,18 @@ Of course you will need to install them first:
 sudo aptitude install tor torsocks
 ```
 
-The correct way to spawn youtubed for use with tor is simply to prepend torsocks to your youtubed call:
+Prepending `torsocks` to your youtubed call should allow you to use youtubed over tor:
 
 ```ShellSession
-torsocks youtubed [usual options] [--default-quality="worstvideo+worstaudio"]
+torsocks youtubed [usual options] [--default-quality="worstvideo+worstaudio"] [--domain-whitelist="domain-whitelist.conf"]
 ```
 
 Please be mindful that the tor network is not (yet) equipped for high bandwidth users, so be considerate and set the download quality to worstvideo+worstaudio or worstaudio when using tor.
 This can be accomplished with the `--default-quality` option as above.
 
-**WARNING: by nature of how youtubed works, the contents of your clipboard may be sent over the tor network upon executing a youtubed command. If your clipboard contains sensitive or identifying information, this could be a serious problem for you. There are currently no safety checks in place to stop you from revealing your clipboard should you accidentally click the blocklet.**
+**WARNING: by nature of how youtubed works, the contents of your clipboard may be sent over the tor network upon executing a youtubed command. If your clipboard contains sensitive or identifying information, this could be a serious problem for you. We strongly suggest using a domain whitelist to prevent yourself from revealing your clipboard should you accidentally click the blocklet.**
+
+Whitelist files should be lines with domain names one per line. Lines beginning with '#' are ignored.
 
 # OPTIONS
 
@@ -155,7 +159,10 @@ This can be accomplished with the `--default-quality` option as above.
 
     --media-cmd         Use "media-cmd file" to open a file after download.
                         Default: i3-msg exec mpv
-    
+
+    --domain-whitelist  Reject url unless its domain is in the given file.
+                        Default: 
+
     --run-in-foreground Tells youtubed to stay in the foreground.
 
 # BUGS
