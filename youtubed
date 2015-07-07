@@ -103,8 +103,16 @@ function info {
     echo "[youtubed] $1"
 }
 
+function pango_escape { 
+    local escaped="$1"                                                          
+    escaped=${escaped//</&lt;}                                                  
+    escaped=${escaped//>/&gt;}                                                     
+    escaped=${escaped//&/&amp;}                                                    
+    echo "$escaped"                                                                
+}  
+
 function pango {
-    echo "<span color='$1'>$2</span>"
+echo "<span color='$1'>$(pango_escape "$2")</span>"
 }
 
 function read_user_options {

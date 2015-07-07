@@ -51,7 +51,7 @@ function send_command {
         exit 0
     fi
 
-    echo "$1" > $FIFO
+    echo "$1" > "$FIFO"
 }
 
 case "$BLOCK_BUTTON" in
@@ -72,10 +72,10 @@ function append_to_with_sep {
 }
 
 for f in "$DAEMON_DIR"/*.i3text; do
-    TEXT=$(head -n 1 $f)
+    TEXT=$(head -n 1 "$f")
     FULL_TEXT=$(append_to_with_sep "$TEXT" "$FULL_TEXT")
 
-    STEXT=$(tail -n 1 $f)
+    STEXT=$(tail -n 1 "$f")
     SHORT_TEXT=$(append_to_with_sep "$STEXT" "$SHORT_TEXT")
 done
 
