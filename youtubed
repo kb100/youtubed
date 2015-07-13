@@ -274,11 +274,17 @@ function download {
         
         local MERGE_REQUIRED=1
         local MERGE_NAME="$FILENAME"
-        if [ ! -f "$DOWNLOAD_DIR"/"$FILENAME" ] && \
-            [ -f "$DOWNLOAD_DIR"/"$FILENAME.$MERGE_OUTPUT_FORMAT" ]; then
-            info "$FILENAME: $MERGE_OUTPUT_FORMAT merge was required"
-            MERGE_NAME="$FILENAME.$MERGE_OUTPUT_FORMAT"
-            MERGE_REQUIRED=0
+        if [ ! -f "$DOWNLOAD_DIR"/"$FILENAME" ]; then
+            info "$DOWNLOAD_DIR/$FILENAME not found"
+            if [ -f "$DOWNLOAD_DIR"/"$FILENAME.$MERGE_OUTPUT_FORMAT" ]; then
+                info "$DOWNLOAD_DIR/$FILENAME.$MERGE_OUTPUT_FORMAT found"
+                info "$FILENAME: $MERGE_OUTPUT_FORMAT merge was required"
+                MERGE_NAME="$FILENAME.$MERGE_OUTPUT_FORMAT"
+                MERGE_REQUIRED=0
+            else
+                info "$DOWNLOAD_DIR/$FILENAME.$MERGE_OUTPUT_FORMAT not found"
+            fi
+
         fi
 
         # If download was successful, rename and watch your video
@@ -302,7 +308,7 @@ function download {
                 bash -c "$MEDIA_CMD ""$DOWNLOAD_DIR"/"$FULL_FILENAME"
             fi
         else
-            info "$FILENAME: Download appears to be unsuccessful,"\
+            info "$FILENAME: Download appears to be unsuccessful, "\
 "possibly because another thread cancelled it."
         fi
 
