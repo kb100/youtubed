@@ -109,7 +109,10 @@ You can also send "toggle_quality" to the fifo to automatically switch between t
 
 # USE WITH TOR
 
-We recommend the use of [tor](https://www.torproject.org/) and torsocks in combination with youtubed.
+Due to an unknown change in youtube-dl, torsocks no longer works with youtube-dl on some systems.
+In the event that your system is not compatible, attempting to run youtube-dl with torsocks will cause your cpus to max out and ram will be malloced at over 1GB per second.
+
+If compatible, we recommend the use of [tor](https://www.torproject.org/) and torsocks in combination with youtubed.
 Of course you will need to install them first:
 
 ```ShellSession
